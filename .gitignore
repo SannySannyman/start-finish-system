@@ -2,3 +2,10 @@
 codegentemp/
 CortexM0/
 Generated_Source/
+
+
+*_timing.html
+*.cycdx
+*.cyfit
+*.rpt
+*.svd
