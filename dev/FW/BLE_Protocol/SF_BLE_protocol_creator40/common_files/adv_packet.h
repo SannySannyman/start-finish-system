@@ -9,6 +9,7 @@
 #define BLE_ADV_PACKET_ENDBYTE      (0xDD)
 #define BLE_CUSTOM_SERVICE_UUID_LSB (0xA1)
 #define BLE_CUSTOM_SERVICE_UUID_MSB (0xE5)
+    
 
     
 enum
@@ -71,10 +72,11 @@ typedef struct
 #define BLE_ADV_RESULT_OK                   0u
 #define BLE_ADV_RESULT_ERR_BAD_PARAM        1u
 
+#define BLE_ADV_ARG_WRITE_NEXT              0xFFu
 #define BLE_ADV_RESULT_DATA_ADDED           0u
 #define BLE_ADV_RESULT_DATA_REPLACED        1u
-#define BLE_ADV_RESULT_DATA_NO_CHANGES      2u
-
+#define BLE_ADV_RESULT_DATA_UPDATED         2u
+#define BLE_ADV_RESULT_DATA_NO_CHANGES      3u
 
 #define BLE_ADV_RESULT_PACKET_NO_CHANGES    0u
 #define BLE_ADV_RESULT_PACKET_UPDATED       1u
@@ -90,13 +92,18 @@ typedef struct
 //}BLE_advPacketsContent_t;
 
 
-void BLE_ADV_DataClearBuff();
-uint8 BLE_ADV_DataSkierSearch(uint8 skierNum);
-uint8 BLE_ADV_DataAddReplace(const BLE_advPacketData_t *newData);
-uint8 BLE_ADV_DataGet(BLE_advPacketData_t *data, uint8 dataIndex);
-uint8 BLE_ADV_DataGetBuffSize(void);
-void BLE_ADV_DataPack(CYBLE_GAPP_DISC_DATA_T *discData, const BLE_advPacketData_t *data);
-void BLE_ADV_DataUnpack(BLE_advPacketData_t *data, const CYBLE_GAPC_ADV_REPORT_T* report);
-uint8 BLE_ADV_IsDataValid(uint8 *data, uint8 len);
+void BLE_ADV_DataBuff_Clear();
+uint8 BLE_ADV_DataBuff_SkierSearch(uint8 skierNum);
+uint16 BLE_ADV_DataBuff_GetOldestTryNumIndex(void);
+uint8 BLE_ADV_DataBuff_SaveData(const BLE_advPacketData_t *newData);
+uint8 BLE_ADV_DataBuff_Size(void);
+uint8 BLE_ADV_DataBuff_DataGet(BLE_advPacketData_t *data, uint8 dataIndex);
+void BLE_ADV_DataPack(CYBLE_GAPP_DISC_DATA_T *discData, 
+                        const BLE_advPacketData_t *data);
+void BLE_ADV_DataUnpack(BLE_advPacketData_t *data, 
+                        const CYBLE_GAPC_ADV_REPORT_T* report);
+uint8 BLE_ADV_IsPacketValid(uint8 *data, uint8 len);
+
+
 
 #endif

@@ -67,9 +67,9 @@ int main(void)
     data.TimeStart = 0x12345678;
     data.TimeFinish = 0x23456789;
     data.TimeResult = 0x11111111;
-    snprintf(data.Text, BLE_ADV_PACKET_TEXTLEN, "Time");
+    snprintf(data.Text, BLE_ADV_PACKET_TEXTBUFFLEN, "Time");
     
-    BLE_ADV_DataAddReplace(&data);
+    BLE_ADV_DataBuff_SaveData(&data);
       
     for(;;)
     {
@@ -89,7 +89,7 @@ int main(void)
                 data.TimeStart = GenRandTime();
                 data.TimeFinish = GenRandTime();
                 data.TimeResult = GenRandTime();     
-                BLE_ADV_DataAddReplace(&data);
+                BLE_ADV_DataBuff_SaveData(&data);
                 
                 if(tryNum <= 0)
                 {

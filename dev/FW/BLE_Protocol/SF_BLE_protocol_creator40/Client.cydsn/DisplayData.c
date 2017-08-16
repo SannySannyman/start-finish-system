@@ -17,7 +17,7 @@ char tempBuff[TEMPBUF_LEN];
 
 void DisplayData_ShowSkierData(BLE_advPacketData_t *skierData)
 {
-    if(BLE_ADV_DataGetBuffSize() >0)
+    if(BLE_ADV_DataBuff_Size() >0)
     {
         LEDD_Clear();
         

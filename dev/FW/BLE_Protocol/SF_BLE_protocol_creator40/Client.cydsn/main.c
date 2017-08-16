@@ -47,13 +47,13 @@ int main(void)
         {
             displayNextFlag = 0;
             
-            if(BLE_ADV_RESULT_OK == BLE_ADV_DataGet(&skierData, num))
+            if(BLE_ADV_RESULT_OK == BLE_ADV_DataBuff_DataGet(&skierData, num))
             {
                 DisplayData_ShowSkierData(&skierData);
             }
             
             num++;
-            if(num >= BLE_ADV_DataGetBuffSize())
+            if(num >= BLE_ADV_DataBuff_Size())
             {
                 num = 0;
             }

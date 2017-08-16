@@ -41,20 +41,15 @@ uint8 BLE_ADV_Process(void)
         {
             nextPacketFlag = 0;
             
-            if(BLE_ADV_DataGet(&advData, dataIndex) == BLE_ADV_RESULT_OK)
+            if(BLE_ADV_DataBuff_DataGet(&advData, dataIndex) == BLE_ADV_RESULT_OK)
             {
-                if(advData.SkierNum == 0)
-                {
-                    asm("nop");
-                }
-
                 BLE_ADV_DataPack(&cyBle_discoveryData, &advData);
                 
                 CyBle_GapUpdateAdvData( cyBle_discoveryModeInfo.advData, 
                                         cyBle_discoveryModeInfo.scanRspData);
                 
                 dataIndex++;
-                if(dataIndex >= BLE_ADV_DataGetBuffSize())
+                if(dataIndex >= BLE_ADV_DataBuff_Size())
                 {
                     dataIndex = 0;
                 }
@@ -70,6 +65,7 @@ uint8 BLE_ADV_Process(void)
             result = BLE_ADV_PROCESS_UPD_WAIT;
         }
     }
+    
     
     return result;
 }
@@ -122,7 +118,7 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
 
 void BLE_Start(void)
 {
-    BLE_ADV_DataClearBuff();
+    BLE_ADV_DataBuff_Clear();
     CyBle_Start(BLE_AppEventHandler);
 }
 

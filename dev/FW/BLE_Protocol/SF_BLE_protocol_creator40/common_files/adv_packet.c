@@ -10,7 +10,7 @@
  * ========================================
 */
 #include "..\common_files\adv_packet.h"
-
+#include "..\common_files\debug.h"
 
 static struct
 {
@@ -20,15 +20,15 @@ static struct
 }advDataBuff;
 
 
-void BLE_ADV_DataClearBuff()
+void BLE_ADV_DataBuff_Clear()
 {
     advDataBuff.ItemNum = 0;
     advDataBuff.WritePtr = 0;
 }
 
-uint8 BLE_ADV_DataSkierSearch(uint8 skierNum)
+uint8 BLE_ADV_DataBuff_SkierSearch(uint8 skierNum)
 {
-    uint8 dataBuffIndex = 0xFF;
+    uint8 dataBuffIndex = BLE_ADV_RESULT_SEARCH_NOT_FOUND;
     uint8 i = 0;
     
     for(i = 0; i < advDataBuff.ItemNum; i++)
@@ -40,46 +40,132 @@ uint8 BLE_ADV_DataSkierSearch(uint8 skierNum)
         }
     }
     
+    //    DBG_PRINTF("Search for skier #%03u\r\n", skierNum);
+    //    
+    //    for(i = 0; i < advDataBuff.ItemNum; i++)
+    //    {
+    //        DBG_PRINTF("%03u\r\n", advDataBuff.Data[i].SkierNum);
+    //    }
+    //DBG_PRINTF("Search result: %u\r\n", dataBuffIndex);
     return dataBuffIndex;
 }
 
-
-
-uint8 BLE_ADV_DataAddReplace(const BLE_advPacketData_t *newData)
+uint16 BLE_ADV_DataBuff_GetOldestTryNumIndex(void)
 {
-    uint8 result;
-    uint8 buffIndex = 0;
-    uint8 writeFlag = 0;
-      
-    buffIndex = BLE_ADV_DataSkierSearch(newData->SkierNum);
+    uint16 oldestTryNum = 0;
+    uint8 oldestIndex = 0;
+    uint8 i = 0;
     
-    if(buffIndex == BLE_ADV_RESULT_SEARCH_NOT_FOUND)
+    if(advDataBuff.ItemNum > 0)     //buff not empty
     {
-        buffIndex = advDataBuff.WritePtr;
-        writeFlag = 1;
-        result = BLE_ADV_RESULT_DATA_ADDED;
+        oldestTryNum = advDataBuff.Data[0].TryNum;
+        
+        for(i = 1; i < advDataBuff.ItemNum; i++)
+        {
+            if(advDataBuff.Data[i].TryNum < oldestTryNum)
+            {
+                oldestTryNum = advDataBuff.Data[i].TryNum;
+                oldestIndex = i;
+            }
+        }
+    }
 
+    return oldestIndex;
+}
+
+uint8 BLE_ADV_DataBuff_GetMinTryNum(void)
+{
+    uint16 minTryNum = 0;
+    uint8 i = 0;
+    
+    if(advDataBuff.ItemNum > 0)     //buff not empty
+    {
+        minTryNum = advDataBuff.Data[0].TryNum;
+        
+        for(i = 1; i < advDataBuff.ItemNum; i++)
+        {
+            if(advDataBuff.Data[i].TryNum < minTryNum)
+            {
+                minTryNum = advDataBuff.Data[i].TryNum;
+            }
+        }
+    }
+    
+    return minTryNum;
+}
+
+void BLE_ADV_DataBuff_WriteData(const BLE_advPacketData_t *newData, uint8 writeIndex)
+{
+    
+    if(writeIndex >= advDataBuff.ItemNum ||
+        writeIndex == BLE_ADV_ARG_WRITE_NEXT)
+    {
+        writeIndex = advDataBuff.WritePtr;
+        
+        advDataBuff.WritePtr++;
+        
+        if(advDataBuff.WritePtr >= BLE_ADV_PACKET_COUNT)
+        {
+            advDataBuff.WritePtr = 0;
+        }
+        
         if(advDataBuff.ItemNum < BLE_ADV_PACKET_COUNT)
         {
             advDataBuff.ItemNum++;
         }
-        
-        advDataBuff.WritePtr++;
-        
-        if(advDataBuff.WritePtr >= advDataBuff.ItemNum)
-        {
-            advDataBuff.WritePtr = 0;
-        } 
     }
-    else
+    
+    advDataBuff.Data[writeIndex].TryNum = newData->TryNum;
+    advDataBuff.Data[writeIndex].SkierNum = newData->SkierNum;
+    advDataBuff.Data[writeIndex].StatusByte = newData->StatusByte;
+    advDataBuff.Data[writeIndex].TimeStart = newData->TimeStart;
+    advDataBuff.Data[writeIndex].TimeFinish = newData->TimeFinish;
+    advDataBuff.Data[writeIndex].TimeResult = newData->TimeResult;
+    strncpy(advDataBuff.Data[writeIndex].Text, 
+            newData->Text, 
+            BLE_ADV_PACKET_TEXTLEN);
+}
+
+uint8 BLE_ADV_DataBuff_SaveData(const BLE_advPacketData_t *newData)
+{
+    uint8 result = BLE_ADV_RESULT_DATA_NO_CHANGES;
+    uint8 writeIndex = 0;
+    uint8 writeFlag = 0;
+    uint8 searchResult = BLE_ADV_RESULT_SEARCH_NOT_FOUND;
+    
+    searchResult = BLE_ADV_DataBuff_SkierSearch(newData->SkierNum);
+    
+    if(searchResult == BLE_ADV_RESULT_SEARCH_NOT_FOUND) //new data
     {
-        if((advDataBuff.Data[buffIndex].StatusByte&STATUS_SK_MASK) != 
-                    (newData->StatusByte&STATUS_SK_MASK))
+        if(advDataBuff.ItemNum < BLE_ADV_PACKET_COUNT)  //buff not full
         {
-            writeFlag = 1;
+            writeIndex = BLE_ADV_ARG_WRITE_NEXT;
+            result = BLE_ADV_RESULT_DATA_ADDED;
+        }
+        else    //buffer full
+        {
+            writeIndex = BLE_ADV_DataBuff_GetOldestTryNumIndex();
+            if(newData->TryNum < BLE_ADV_DataBuff_GetMinTryNum())   //try num less then all avalible in full buffer
+            {
+                BLE_ADV_DataBuff_Clear();
+            }
             result = BLE_ADV_RESULT_DATA_REPLACED;
         }
-        else
+        writeFlag = 1;
+    }
+    else    //skier num already in buff
+    {
+        if((advDataBuff.Data[searchResult].StatusByte&STATUS_SK_MASK) != 
+           (newData->StatusByte&STATUS_SK_MASK) || 
+           (advDataBuff.Data[searchResult].TryNum != newData->TryNum))              
+                //new status or try number - updated data
+        {
+            writeIndex =  searchResult;
+            writeFlag = 1;
+            
+            result = BLE_ADV_RESULT_DATA_UPDATED;
+        }
+        else    //old status - same as data in buff
         {
             result = BLE_ADV_RESULT_DATA_NO_CHANGES;
         }
@@ -87,21 +173,18 @@ uint8 BLE_ADV_DataAddReplace(const BLE_advPacketData_t *newData)
     
     if(writeFlag != 0)
     {
-        advDataBuff.Data[buffIndex].TryNum = newData->TryNum;
-        advDataBuff.Data[buffIndex].SkierNum = newData->SkierNum;
-        advDataBuff.Data[buffIndex].StatusByte = newData->StatusByte;
-        advDataBuff.Data[buffIndex].TimeStart = newData->TimeStart;
-        advDataBuff.Data[buffIndex].TimeFinish = newData->TimeFinish;
-        advDataBuff.Data[buffIndex].TimeResult = newData->TimeResult;
-        strncpy(advDataBuff.Data[buffIndex].Text, 
-                newData->Text, 
-                BLE_ADV_PACKET_TEXTLEN);
+        BLE_ADV_DataBuff_WriteData(newData, writeIndex);
     }
+    
     return result;
 }
 
+uint8 BLE_ADV_DataBuff_Size(void)
+{
+    return advDataBuff.ItemNum;
+}
 
-uint8 BLE_ADV_DataGet(BLE_advPacketData_t *data, uint8 dataIndex)
+uint8 BLE_ADV_DataBuff_DataGet(BLE_advPacketData_t *data, uint8 dataIndex)
 {
     if(dataIndex < advDataBuff.ItemNum)
     {
@@ -124,21 +207,10 @@ uint8 BLE_ADV_DataGet(BLE_advPacketData_t *data, uint8 dataIndex)
 }
 
 
-uint8 BLE_ADV_DataGetBuffSize(void)
-{
-    return advDataBuff.ItemNum;
-}
-
 
 void BLE_ADV_DataPack(CYBLE_GAPP_DISC_DATA_T *discData, 
                         const BLE_advPacketData_t *data)
-{
-
-    if(data->SkierNum == 0)
-    {
-        asm("nop");
-    }
-    
+{   
     discData->advData[ADV_PACKET_UUID_DATALEN] = ADV_PACKET_LEN - 4; /* Length */
     discData->advData[ADV_PACKET_SERVICEDATA] = 0x16;      /* Service Data */
     discData->advData[ADV_PACKET_UUID_LSB] = BLE_CUSTOM_SERVICE_UUID_LSB;
@@ -210,7 +282,7 @@ void BLE_ADV_DataUnpack(BLE_advPacketData_t *data,
 }
 
 
-uint8 BLE_ADV_IsDataValid(uint8 *data, uint8 len)
+uint8 BLE_ADV_IsPacketValid(uint8 *data, uint8 len)
 {   
     if(len == ADV_PACKET_LEN)
     {

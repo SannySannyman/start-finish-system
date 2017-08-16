@@ -16,7 +16,7 @@ void BLE_AppEventHandler(uint32 event, void* eventParam);
 
 void BLE_Init(void)
 {
-    BLE_ADV_DataClearBuff();
+    BLE_ADV_DataBuff_Clear();
     CyBle_Start(BLE_AppEventHandler);
 }
 
@@ -39,11 +39,10 @@ void BLE_StartScan(uint8 scanIntervalType)
 void BLE_ScanProgressEventHandler(CYBLE_GAPC_ADV_REPORT_T* eventParam)
 {
     static uint8 prewPacket[CYBLE_GAP_MAX_ADV_DATA_LEN];
-    uint8 dataIndex = 0;
     uint8 result = 0;
 
     
-    if(BLE_ADV_IsDataValid(eventParam->data, eventParam->dataLen))
+    if(BLE_ADV_IsPacketValid(eventParam->data, eventParam->dataLen))
     {
         if(memcmp(prewPacket, eventParam->data, eventParam->dataLen) != 0) /*check for new packet*/
         {
@@ -51,20 +50,24 @@ void BLE_ScanProgressEventHandler(CYBLE_GAPC_ADV_REPORT_T* eventParam)
             
             BLE_ADV_DataUnpack(&advData, eventParam);
             
-            result = BLE_ADV_DataAddReplace(&advData);
+            result = BLE_ADV_DataBuff_SaveData(&advData);
             if(result != BLE_ADV_RESULT_DATA_NO_CHANGES)
             {
                 if(result == BLE_ADV_RESULT_DATA_ADDED)
                 {
-                    DBG_PRINTF("New data :\n\r");
+                    DBG_PRINTF("New data :\r\n");
+                }
+                if(result == BLE_ADV_RESULT_DATA_UPDATED)
+                {
+                    DBG_PRINTF("Updated data :\r\n");
                 }
                 if(result == BLE_ADV_RESULT_DATA_REPLACED)
                 {
-                    DBG_PRINTF("Replaced data :\n\r");
+                    DBG_PRINTF("Replaced data :\r\n");
                 }
                 
                 DEBUG_DISPLAY_Print(&advData);
-                DBG_PRINTF("\n\r");
+                DBG_PRINTF("\r\n");
             }
         }
         
