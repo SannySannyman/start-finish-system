@@ -14,9 +14,9 @@
 #include <string.h>
 
 volatile uint8 rowCnt = 0;
+volatile uint8 displayEnable = 1;
 uint16 LEDChIdx = 0;
 
-//uint8 displayBuff[LED_DISPLAY_BUFFSIZE];
 struct 
 {
     uint16 X;
@@ -43,7 +43,7 @@ void DisplaySendByte(void)
         DISP_L_Write(1);
         asm("nop");
         DISP_L_Write(0);
-        OE_Control_Write(1);
+        OE_Control_Write(displayEnable);
         
         rowCnt++;
         if(rowCnt >= LEDD_MUXNUM)
@@ -364,6 +364,16 @@ uint16 LEDD_GetXpos(void)
 uint16 LEDD_GetYpos(void)
 {
     return txtPos.Y;
+}
+
+void LEDD_SetEnable(uint8 state)
+{
+    displayEnable = state;
+}
+
+uint8 LEDD_GetEnable(void)
+{
+    return displayEnable;
 }
 
 /* [] END OF FILE */

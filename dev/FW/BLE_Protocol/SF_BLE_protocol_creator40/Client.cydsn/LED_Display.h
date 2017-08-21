@@ -67,6 +67,8 @@ LEDDResponse_t LEDD_Str (const char *dataArray);
 LEDDResponse_t LEDD_GotoXY(uint16 x, uint16 y);
 uint16 LEDD_GetXpos(void);
 uint16 LEDD_GetYpos(void);
+void LEDD_SetEnable(uint8 state);
+uint8 LEDD_GetEnable(void);
 
 // 
 //  Font data for Microsoft Sans Serif 7pt
