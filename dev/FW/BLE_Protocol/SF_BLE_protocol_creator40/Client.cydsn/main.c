@@ -9,6 +9,9 @@
  *
  * ========================================
 */
+
+#define BLE_ADV_PACKET_COUNT 10
+
 #include "project.h"
 #include "..\common_files\debug.h"
 #include "bluetooth.h"

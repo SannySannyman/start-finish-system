@@ -3,7 +3,10 @@
     
 #include "project.h"
 
-#define BLE_ADV_PACKET_COUNT    5
+#ifndef  BLE_ADV_PACKET_COUNT
+    #define BLE_ADV_PACKET_COUNT 5
+#endif
+    
 #define BLE_ADV_PACKET_TEXTLEN  4
 #define BLE_ADV_PACKET_TEXTBUFFLEN  (BLE_ADV_PACKET_TEXTLEN+1)
 #define BLE_ADV_PACKET_ENDBYTE      (0xDD)
