@@ -13,6 +13,7 @@
 
 BLE_advPacketData_t advData;
 void BLE_AppEventHandler(uint32 event, void* eventParam);
+uint8 newDataFlag = 0;
 
 void BLE_Init(void)
 {
@@ -53,6 +54,8 @@ void BLE_ScanProgressEventHandler(CYBLE_GAPC_ADV_REPORT_T* eventParam)
             result = BLE_ADV_DataBuff_SaveData(&advData);
             if(result != BLE_ADV_RESULT_DATA_NO_CHANGES)
             {
+                newDataFlag = 1;
+                
                 if(result == BLE_ADV_RESULT_DATA_ADDED)
                 {
                     DBG_PRINTF("New data :\r\n");
@@ -97,6 +100,17 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
     }
     
     DEBUG_BLE_PrintAppEvent(event, eventParam);
+}
+
+
+uint8 BLE_IsNewAdvData()
+{
+    uint8 retResult = 0;
+    
+    retResult = newDataFlag;
+    newDataFlag = 0;
+    
+    return retResult;
 }
 
 

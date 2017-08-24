@@ -18,6 +18,7 @@
 
 
 void BLE_Init(void);
+uint8 BLE_IsNewAdvData();
 
 #endif
 
