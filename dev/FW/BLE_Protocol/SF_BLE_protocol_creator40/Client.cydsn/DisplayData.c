@@ -13,7 +13,74 @@
 #include "DisplayData.h"
 
 #define TEMPBUF_LEN 20
+
+BLE_advPacketData_t tempData;
+
+typedef enum
+{
+    DISPLAYSTATE_OFF,
+    DISPLAYSTATE_COUNTDOWN,
+    DISPLAYSTATE_FOREVER
+}displayState_t;
+
+
 char tempBuff[TEMPBUF_LEN];
+
+volatile uint16 displayShowTimer = 0;
+volatile uint16 displayBlinkTimer = 0;
+volatile displayState_t displayState = DISPLAYSTATE_OFF;
+uint8 displayShowMode = SHOWMODE_ON;
+
+void DisplayData_ISR_Handler(void)
+{
+    if(displayState != DISPLAYSTATE_OFF)
+    {
+        if(displayShowMode == SHOWMODE_BLINK)
+        {
+            displayBlinkTimer++;
+            if(displayBlinkTimer >= BLINK_INTERVAL)
+            {
+                displayBlinkTimer = 0;
+                LEDD_SetEnable(~LEDD_GetEnable());
+            }
+        }
+        
+        if(displayState == DISPLAYSTATE_COUNTDOWN)
+        {
+            displayShowTimer--;
+            if(displayShowTimer <= 0)
+            {
+                LEDD_SetEnable(0);
+                displayState = DISPLAYSTATE_OFF;
+                displayBlinkTimer = 0;
+            }
+        }
+    }
+}
+
+
+void DisplayData_Init(void)
+{
+    uint8 i = 0;
+    
+    LEDD_SetEnable(0);
+    displayShowTimer = 0;
+    displayBlinkTimer = 0;
+    displayState = DISPLAYSTATE_OFF;
+    displayShowMode = SHOWMODE_ON;
+    
+    CySysTickStart();
+    
+    for (i = 0u; i < CY_SYS_SYST_NUM_OF_CALLBACKS; ++i)
+    {
+        if (CySysTickGetCallback(i) == NULL)
+        {
+            CySysTickSetCallback(i, DisplayData_ISR_Handler);
+            break;
+        }
+    }
+    
+}
 
 void DisplayData_ShowSkierData(BLE_advPacketData_t *skierData)
 {
@@ -63,5 +130,80 @@ void DisplayData_ShowSkierData(BLE_advPacketData_t *skierData)
     }
 }
 
+uint8 DisplayData_IsBusy(void)
+{
+    if(displayState == DISPLAYSTATE_OFF || displayState == DISPLAYSTATE_FOREVER)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+
+
+void DisplayData_StopShow(void)
+{
+    
+    LEDD_SetEnable(0);
+    displayBlinkTimer = 0;
+    displayState = DISPLAYSTATE_OFF;
+}
+
+
+
+
+uint8 DisplayData_StartShow(uint16 showTime, uint8 showMode)
+{
+    if(!DisplayData_IsBusy())
+    {
+        displayBlinkTimer = 0;
+        displayShowMode = showMode;
+        
+        if(showTime == 0)
+        {
+            displayState = DISPLAYSTATE_FOREVER;
+        }
+        else
+        {
+            displayShowTimer = showTime;
+            displayState = DISPLAYSTATE_COUNTDOWN;
+        }
+        
+        LEDD_SetEnable(1);
+        
+        return DISPLAYDATA_STARTSHOW_OK;
+    }
+    else
+    {
+        return DISPLAYDATA_STARTSHOW_BUSY;
+    }
+}
+
+
+void DisplayData_Process(void)
+{
+    if(BLE_IsNewAdvData())
+    {
+        if(DisplayData_IsBusy())
+        {
+            DisplayData_StopShow();
+        }
+        
+        BLE_ADV_DataBuff_DataGetLatest(&tempData);
+        DisplayData_ShowSkierData(&tempData);
+        
+        if((tempData.StatusByte&STATUS_SK_MASK) == STATUS_SK_STARTED)
+        {
+            DisplayData_StartShow(5000, SHOWMODE_BLINK);
+        }
+        else
+        {
+            DisplayData_StartShow(5000, SHOWMODE_ON);
+        }
+    }
+}
 
 /* [] END OF FILE */
