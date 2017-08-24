@@ -97,10 +97,12 @@ typedef struct
 
 void BLE_ADV_DataBuff_Clear();
 uint8 BLE_ADV_DataBuff_SkierSearch(uint8 skierNum);
-uint16 BLE_ADV_DataBuff_GetOldestTryNumIndex(void);
+uint8 BLE_ADV_DataBuff_GetOldestTryNumIndex(void);
+uint8 BLE_ADV_DataBuff_GetLatestTryNumIndex(void);
 uint8 BLE_ADV_DataBuff_SaveData(const BLE_advPacketData_t *newData);
 uint8 BLE_ADV_DataBuff_Size(void);
 uint8 BLE_ADV_DataBuff_DataGet(BLE_advPacketData_t *data, uint8 dataIndex);
+uint8 BLE_ADV_DataBuff_DataGetLatest(BLE_advPacketData_t *data);
 void BLE_ADV_DataPack(CYBLE_GAPP_DISC_DATA_T *discData, 
                         const BLE_advPacketData_t *data);
 void BLE_ADV_DataUnpack(BLE_advPacketData_t *data, 

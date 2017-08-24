@@ -50,7 +50,7 @@ uint8 BLE_ADV_DataBuff_SkierSearch(uint8 skierNum)
     return dataBuffIndex;
 }
 
-uint16 BLE_ADV_DataBuff_GetOldestTryNumIndex(void)
+uint8 BLE_ADV_DataBuff_GetOldestTryNumIndex(void)
 {
     uint16 oldestTryNum = 0;
     uint8 oldestIndex = 0;
@@ -72,6 +72,31 @@ uint16 BLE_ADV_DataBuff_GetOldestTryNumIndex(void)
 
     return oldestIndex;
 }
+
+
+uint8 BLE_ADV_DataBuff_GetLatestTryNumIndex(void)
+{
+    uint16 latestTryNum = 0;
+    uint8 latestIndex = 0;
+    uint8 i = 0;
+    
+    if(advDataBuff.ItemNum > 0)     //buff not empty
+    {
+        latestTryNum = advDataBuff.Data[0].TryNum;
+        
+        for(i = 1; i < advDataBuff.ItemNum; i++)
+        {
+            if(advDataBuff.Data[i].TryNum > latestTryNum)
+            {
+                latestTryNum = advDataBuff.Data[i].TryNum;
+                latestIndex = i;
+            }
+        }
+    }
+
+    return latestIndex;
+}
+
 
 uint8 BLE_ADV_DataBuff_GetMinTryNum(void)
 {
@@ -206,6 +231,15 @@ uint8 BLE_ADV_DataBuff_DataGet(BLE_advPacketData_t *data, uint8 dataIndex)
     }
 }
 
+
+uint8 BLE_ADV_DataBuff_DataGetLatest(BLE_advPacketData_t *data)
+{
+    uint8 index = 0;
+    
+    index = BLE_ADV_DataBuff_GetLatestTryNumIndex();
+    
+    return BLE_ADV_DataBuff_DataGet(data, index);
+}
 
 
 void BLE_ADV_DataPack(CYBLE_GAPP_DISC_DATA_T *discData, 
