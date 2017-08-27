@@ -233,7 +233,6 @@ void invertText(bool mode)
 
 void print(char *st, int x, int y)
 {
-	unsigned char ch;
 	int stl;
 
 	stl = strlen(st);
@@ -469,7 +468,6 @@ void clrHLine(int x, int y, int l)
 
 void drawVLine(int x, int y, int l)
 {
-	int by, bi;
 
 	if ((x>=0) && (x<84) && (y>=0) && (y<48))
 	{
@@ -483,7 +481,6 @@ void drawVLine(int x, int y, int l)
 
 void clrVLine(int x, int y, int l)
 {
-	int by, bi;
 
 	if ((x>=0) && (x<84) && (y>=0) && (y<48))
 	{
@@ -499,7 +496,6 @@ void drawLine(int x1, int y1, int x2, int y2)
 {
 	int tmp;
 	double delta, tx, ty;
-	double m, b, dx, dy;
 	
 	if (((x2-x1)<0))
 	{
@@ -593,7 +589,6 @@ void clrLine(int x1, int y1, int x2, int y2)
 {
 	int tmp;
 	double delta, tx, ty;
-	double m, b, dx, dy;
 	
 	if (((x2-x1)<0))
 	{
@@ -794,7 +789,6 @@ void drawCircle(int x, int y, int radius)
 	int ddF_y = -2 * radius;
 	int x1 = 0;
 	int y1 = radius;
-	char ch, cl;
 	
 	setPixel(x, y + radius);
 	setPixel(x, y - radius);
@@ -830,7 +824,6 @@ void clrCircle(int x, int y, int radius)
 	int ddF_y = -2 * radius;
 	int x1 = 0;
 	int y1 = radius;
-	char ch, cl;
 	
 	clrPixel(x, y + radius);
 	clrPixel(x, y - radius);
