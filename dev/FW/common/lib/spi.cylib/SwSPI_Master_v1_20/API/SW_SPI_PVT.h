@@ -122,22 +122,22 @@
 #endif /* CY_PSOC4 */
     
 /* Shift SPI on port*/
-/*
-#if (0 == `$INSTANCE_NAME`_SPI__SHIFT)
-    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x00u)
-#elif (1 == `$INSTANCE_NAME`_SPI__SHIFT)
-    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x01u)
-#elif (2 == `$INSTANCE_NAME`_SPI__SHIFT)
-    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x02u)
-#elif (3 == `$INSTANCE_NAME`_SPI__SHIFT)
-    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x03u)
-#elif (4 == `$INSTANCE_NAME`_SPI__SHIFT)
-    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x04u)
-#elif (5 == `$INSTANCE_NAME`_SPI__SHIFT)
-    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x05u)
-#else
-    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x06u)
-#endif /* (0 == `$INSTANCE_NAME`_LCDPort__SHIFT) */
+
+//#if (0 == `$INSTANCE_NAME`_SPI__SHIFT)
+//    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x00u)
+//#elif (1 == `$INSTANCE_NAME`_SPI__SHIFT)
+//    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x01u)
+//#elif (2 == `$INSTANCE_NAME`_SPI__SHIFT)
+//    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x02u)
+//#elif (3 == `$INSTANCE_NAME`_SPI__SHIFT)
+//    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x03u)
+//#elif (4 == `$INSTANCE_NAME`_SPI__SHIFT)
+//    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x04u)
+//#elif (5 == `$INSTANCE_NAME`_SPI__SHIFT)
+//    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x05u)
+//#else
+//    #define `$INSTANCE_NAME`_OUTPORT_SHIFT               (0x06u)
+//#endif /* (0 == `$INSTANCE_NAME`_LCDPort__SHIFT) */
 
 /* OutPort mask */
 //#define `$INSTANCE_NAME`_OUTPORT_MASK                ((uint8) (`$INSTANCE_NAME`_SPI__MASK))
@@ -150,13 +150,10 @@
     * four data pins, in this way we get - 0x00000249. A similar Strong drive
     * is defined with "110b" so we get 0x00000DB6.
     */
-    //#define `$INSTANCE_NAME`_HIGH_Z_DATA_DM           ((0x00000249ul) << (`$INSTANCE_NAME`_OUTPORT_SHIFT *\
-                                                                          `$INSTANCE_NAME`_DM_PIN_STEP))
-    //#define `$INSTANCE_NAME`_STRONG_DATA_DM           ((0x00000DB6ul) << (`$INSTANCE_NAME`_OUTPORT_SHIFT *\
-                                                                          `$INSTANCE_NAME`_DM_PIN_STEP))
+    //#define `$INSTANCE_NAME`_HIGH_Z_DATA_DM           ((0x00000249ul) << (`$INSTANCE_NAME`_OUTPORT_SHIFT * `$INSTANCE_NAME`_DM_PIN_STEP))
+    //#define `$INSTANCE_NAME`_STRONG_DATA_DM           ((0x00000DB6ul) << (`$INSTANCE_NAME`_OUTPORT_SHIFT * `$INSTANCE_NAME`_DM_PIN_STEP))
     //#define `$INSTANCE_NAME`_DATA_PINS_MASK           (0x00000FFFul)
-    //#define `$INSTANCE_NAME`_DM_DATA_MASK             ((uint32) (`$INSTANCE_NAME`_DATA_PINS_MASK << \
-                                                      (`$INSTANCE_NAME`_OUTPORT_SHIFT * `$INSTANCE_NAME`_DM_PIN_STEP)))
+    //#define `$INSTANCE_NAME`_DM_DATA_MASK             ((uint32) (`$INSTANCE_NAME`_DATA_PINS_MASK << (`$INSTANCE_NAME`_OUTPORT_SHIFT * `$INSTANCE_NAME`_DM_PIN_STEP)))
 
 #else
 
