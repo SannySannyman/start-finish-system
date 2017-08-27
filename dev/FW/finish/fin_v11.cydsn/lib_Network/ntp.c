@@ -38,7 +38,7 @@ uint8_t NTP_STATE = 0;
 
 uint8_t NtpUnpackData(NtpResp *Data, uint8_t InByte)
 {
-	uint8_t RecvB = InByte;
+	//uint8_t RecvB = InByte;
 	uint32_t ERR_CODE = 0;
 	InByte = NtpDecodeByte(InByte);
 
