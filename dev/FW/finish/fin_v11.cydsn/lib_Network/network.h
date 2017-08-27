@@ -2,7 +2,7 @@
     #define _NETWORK_H
   
 #include <CyLib.h>
-
+#include <inttypes.h>
 //#define DEBUG_INFO
 //#define DEBUG_TIME
 //#define DEBUG_NTP

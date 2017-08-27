@@ -2,6 +2,7 @@
     #define _LOG_RESULT_H
 
 #include <CyLib.h>
+#include <inttypes.h>
 #include "..\..\common\lib\lib_DB\database.h"
 #include "..\..\common\lib\lib_Fat\ff.h"
 

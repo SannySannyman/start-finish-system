@@ -721,7 +721,7 @@ void NTPsendTime(uint32_t unixTime,uint16_t millis, uint16_t ID)
     char sendData[DATA_BUFFER];
     
     /*pack data*/
-    sprintf(sendData,"%08X%03X", unixTime,millis); 
+    sprintf(sendData,"%08"PRIx32"%03X", unixTime ,millis);  
     PackData(sendBuffer, (uint8_t *)sendData, ID);
     UART_XB_UartPutString(sendBuffer);
     UART_XB_UartPutChar('0');

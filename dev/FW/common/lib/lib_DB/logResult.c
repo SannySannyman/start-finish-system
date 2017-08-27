@@ -78,7 +78,7 @@ uint32_t WriteSkierResult(skierDB_El *data)
     nameDay = RTC_GetDay(date);
     
     /*Construct name of file in format dd_mm_yyyy*/
-    sprintf(nameFile,"%02d_%02d_%d.txt",nameDay,nameMonth,nameYear);
+    sprintf(nameFile,"%02"PRId32"_%02"PRId32"_%"PRId32".txt",nameDay,nameMonth,nameYear);
     createFlag = 0;
     resultF = f_open(&fileO, nameFile, FA_WRITE | FA_OPEN_APPEND, &createFlag);
     
@@ -101,11 +101,11 @@ uint32_t WriteSkierResult(skierDB_El *data)
         sprintf(result, "%02lu:%03u",(uint32)data->secondsWay,data->millsWay);
         if(data->permiss)
         {
-            sprintf(writeData,"\n\r%d\t%d\t\t%s\t\t%s\t\t%s\n\r",
+            sprintf(writeData,"\n\r%"PRId32"\t%d\t\t%s\t\t%s\t\t%s\n\r",
                 position, data->idSkier, start, finish, result);
         }else
         {
-            sprintf(writeData,"\n\r%d\t%d\t\t(%s)\t\t(%s)\t\t(%s)\n\r",
+            sprintf(writeData,"\n\r%"PRId32"\t%d\t\t(%s)\t\t(%s)\t\t(%s)\n\r",
                 position, data->idSkier, start, finish, result);
         } 
         if((position == 1) || (createFlag == 1))

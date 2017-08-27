@@ -10,7 +10,7 @@
 #endif
 #include "appGlobal.h"
 
-static uint8_t savedIdSkier;
+//static uint8_t savedIdSkier;
 static uint64_t savedUnixTime;
 static uint32_t savedRecentMs;
 static uint8_t savedFinPermiss;
