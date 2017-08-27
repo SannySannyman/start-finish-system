@@ -247,7 +247,7 @@ uint8_t UnpackData(struct Resp *Data, uint8_t InByte)
     			{
                     uint32_t _tmpcrc;
                     char _tmpdata[40];
-                    sprintf(_tmpdata, "%02X:%08X%08X%04X%04X", Data->Command, 
+                    sprintf(_tmpdata, "%02X:%08"PRIX32"%08"PRIX32"%04X%04X", Data->Command, 
                         (uint32_t)((Data->Data1 & 0xFFFFFFFF00000000) >> 32), 
                         (uint32_t)(Data->Data1 & 0x00000000FFFFFFFF), 
                         Data->Data2, Data->Data3);
@@ -335,7 +335,7 @@ uint8_t PackData(char *buff, uint8_t *data, uint16_t Sequence)
     _crc = crc32_calc_block((uint8_t *)"F", 1, _crc);
     _crc = crc32_final(_crc);
     
-    sprintf(szCheckSum, "%08X", _crc);
+    sprintf(szCheckSum, "%08"PRIX32"", _crc);
     
     strcpy(buff, STX_S);
     strcat(buff, szSeq);
