@@ -18,10 +18,32 @@
 #define TIME_BYTESIZE 4
 
 const uint8 maxArr[TIME_BYTESIZE] = {24, 60, 60, 100};
+volatile uint8 btnPressedFlag = 0;
 
 CY_ISR(isr_Timer_Handler)
 {
-    BLE_ADV_NextPacket();
+    static uint8 cnt = 0;
+    static uint8 tempBtnStatus = 0;
+    
+    cnt++;
+    if(cnt >= 4)
+    {
+        BLE_ADV_NextPacket();
+    }
+    
+    if(Pin_Button_Read() == 0)
+    {
+        tempBtnStatus = 1;
+    }
+    else 
+    {
+        if(tempBtnStatus == 1)
+        {
+            tempBtnStatus = 0;
+            btnPressedFlag = 1;
+        }
+    }
+    
     Timer_ClearInterrupt(Timer_INTR_MASK_TC);
 }
 
@@ -50,8 +72,6 @@ int main(void)
 {
     BLE_advPacketData_t data;
     uint16 tryNum = 1;
-    uint8 result;
-    uint8 cnt = 0;
     
     CyGlobalIntEnable; /* Enable global interrupts. */
     
@@ -59,45 +79,39 @@ int main(void)
     
     Timer_Start();
     isr_Timer_StartEx(isr_Timer_Handler);
-    BLE_Start();
+    BLE_Init();
     
-    data.TryNum = tryNum++;
-    data.SkierNum = 12;
-    data.StatusByte = STATUS_SK_STARTED;
-    data.TimeStart = 0x12345678;
-    data.TimeFinish = 0x23456789;
-    data.TimeResult = 0x11111111;
     snprintf(data.Text, BLE_ADV_PACKET_TEXTBUFFLEN, "Time");
-    
-    BLE_ADV_DataBuff_SaveData(&data);
       
     for(;;)
     {
         CyBle_ProcessEvents();
         
-        result = BLE_ADV_Process();
-        if(result == BLE_ADV_RESULT_PACKET_UPDATED)
+        BLE_ADV_Process();
+        
+        if(btnPressedFlag == 1)
         {
-            cnt++;
-            if(cnt >= 10)
+            btnPressedFlag = 0;
+            
+            data.TryNum = tryNum;
+            data.SkierNum = (rand()%255)+1;
+            data.StatusByte = rand()%3+1;
+            data.TimeStart = GenRandTime();
+            data.TimeFinish = GenRandTime();
+            data.TimeResult = GenRandTime();     
+            BLE_ADV_DataBuff_SaveData(&data);
+            
+            DBG_PRINTF("Generated data:\r\n");
+            DEBUG_DISPLAY_Print(&data);
+            DBG_PRINTF("\r\n");
+            
+            tryNum++;
+            if(tryNum <= 0)
             {
-                cnt = 0;
-
-                data.TryNum = tryNum;
-                data.SkierNum = (rand()%255)+1;
-                data.StatusByte = rand()%3+1;
-                data.TimeStart = GenRandTime();
-                data.TimeFinish = GenRandTime();
-                data.TimeResult = GenRandTime();     
-                BLE_ADV_DataBuff_SaveData(&data);
-                
-                if(tryNum <= 0)
-                {
-                    tryNum = 1;
-                }
-                tryNum++;
-                
+                tryNum = 1;
             }
+            
+
             Pin_GreenLED_Write(~Pin_GreenLED_Read());
         }
         
