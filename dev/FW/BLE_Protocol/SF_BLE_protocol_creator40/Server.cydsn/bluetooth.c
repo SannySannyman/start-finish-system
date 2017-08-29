@@ -15,10 +15,12 @@
 
 volatile uint8 nextPacketFlag = 0;
 
-BLE_advPacketData_t advData;
+BLE_advPacketData_t tempAdvData;
 
 CYBLE_GATT_HANDLE_VALUE_PAIR_T tempHandle;
 CYBLE_CONN_HANDLE_T connectionHandle;
+
+CYBLE_API_RESULT_T tempResult = CYBLE_ERROR_OK;
 
 uint8 testVal = 0;
 
@@ -41,32 +43,36 @@ uint8 BLE_ADV_Process(void)
         {
             nextPacketFlag = 0;
             
-            if(BLE_ADV_DataBuff_DataGet(&advData, dataIndex) == BLE_ADV_RESULT_OK)
+            if(BLE_ADV_DataBuff_DataGet(&tempAdvData, dataIndex) == BLE_ADV_RESULT_OK)
             {
-                BLE_ADV_DataPack(&cyBle_discoveryData, &advData);
-                
-                CyBle_GapUpdateAdvData( cyBle_discoveryModeInfo.advData, 
-                                        cyBle_discoveryModeInfo.scanRspData);
-                
-                dataIndex++;
-                if(dataIndex >= BLE_ADV_DataBuff_Size())
-                {
-                    dataIndex = 0;
-                }
                 result = BLE_ADV_PROCESS_PACKET_UPDATED;
             }
             else
             {
-                result = BLE_ADV_PROCESS_ERR;
+                BLE_ADV_GetDefaultData(&tempAdvData);
+                result = BLE_ADV_PROCESS_DEFAULT;
             }
+            
+            BLE_ADV_DataPack(&cyBle_discoveryData, &tempAdvData);
+            tempResult = CyBle_GapUpdateAdvData( cyBle_discoveryModeInfo.advData, 
+                                    cyBle_discoveryModeInfo.scanRspData);
+            if(tempResult != CYBLE_ERROR_OK)
+            {
+                result = BLE_ADV_PROCESS_ERROR;
+            }
+            
+            dataIndex++;
+            if(dataIndex >= BLE_ADV_DataBuff_Size())
+            {
+                dataIndex = 0;
+            }
+
         }
         else
         {
             result = BLE_ADV_PROCESS_UPD_WAIT;
         }
     }
-    
-    
     return result;
 }
 
@@ -114,14 +120,10 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
 }
 
 
-
-
-void BLE_Start(void)
+void BLE_Init(void)
 {
     BLE_ADV_DataBuff_Clear();
     CyBle_Start(BLE_AppEventHandler);
 }
-
-
 
 /* [] END OF FILE */

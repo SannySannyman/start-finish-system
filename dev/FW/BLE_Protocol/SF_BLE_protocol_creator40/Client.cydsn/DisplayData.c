@@ -185,7 +185,33 @@ uint8 DisplayData_StartShow(uint16 showTime, uint8 showMode)
 
 void DisplayData_Process(void)
 {
-    if(BLE_IsNewAdvData())
+    static int16 avgRSSI = 0;
+    static uint8 RSSIcnt = 0;
+    
+    if(BLE_GetServiceModeFlag() == 1)
+    {
+        if(BLE_IsAdvDataReceived())
+        {
+            avgRSSI += BLE_GetLastRSSI();
+            RSSIcnt++;
+            
+            if(RSSIcnt >= RSSI_AVG_NUM)
+            {
+                RSSIcnt = 0;
+                avgRSSI /= RSSI_AVG_NUM;
+                
+                LEDD_Clear();
+                LEDD_GotoXY(0, 8);
+                snprintf(tempBuff, TEMPBUF_LEN, "RSSI = %i", avgRSSI);
+                LEDD_Str(tempBuff);
+                DisplayData_StartShow(0, SHOWMODE_ON);
+                
+                avgRSSI = 0;
+            }
+        }
+    }
+    
+    else if(BLE_IsNewAdvDataReceived())
     {
         if(DisplayData_IsBusy())
         {

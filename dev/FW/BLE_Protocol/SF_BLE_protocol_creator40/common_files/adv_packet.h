@@ -10,6 +10,7 @@
 #define BLE_ADV_PACKET_TEXTLEN  4
 #define BLE_ADV_PACKET_TEXTBUFFLEN  (BLE_ADV_PACKET_TEXTLEN+1)
 #define BLE_ADV_PACKET_ENDBYTE      (0xDD)
+#define BLE_ADV_SERVICE_DATA        (0x16)
 #define BLE_CUSTOM_SERVICE_UUID_LSB (0xA1)
 #define BLE_CUSTOM_SERVICE_UUID_MSB (0xE5)
     
@@ -59,6 +60,9 @@ enum
 
 #define STATUS_SK_MASK (0x03)
 
+#define STATUS_SERVICE_MODE_SHIFT   (2u)
+#define STATUS_SERVICE_MODE_MASK    (0x01<<STATUS_SERVICE_MODE_SHIFT)
+
 typedef struct
 {
     uint16 TryNum;
@@ -70,7 +74,6 @@ typedef struct
     char Text[BLE_ADV_PACKET_TEXTBUFFLEN];
 }BLE_advPacketData_t;
     
-
 
 #define BLE_ADV_RESULT_OK                   0u
 #define BLE_ADV_RESULT_ERR_BAD_PARAM        1u
@@ -108,6 +111,7 @@ void BLE_ADV_DataPack(CYBLE_GAPP_DISC_DATA_T *discData,
 void BLE_ADV_DataUnpack(BLE_advPacketData_t *data, 
                         const CYBLE_GAPC_ADV_REPORT_T* report);
 uint8 BLE_ADV_IsPacketValid(uint8 *data, uint8 len);
+void BLE_ADV_GetDefaultData(BLE_advPacketData_t *data);
 
 
 

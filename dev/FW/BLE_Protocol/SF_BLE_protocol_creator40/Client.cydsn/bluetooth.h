@@ -18,7 +18,10 @@
 
 
 void BLE_Init(void);
-uint8 BLE_IsNewAdvData();
+uint8 BLE_IsAdvDataReceived(void);
+uint8 BLE_IsNewAdvDataReceived(void);
+int8 BLE_GetLastRSSI(void);
+uint8 BLE_GetServiceModeFlag(void);
 
 #endif
 

@@ -17,6 +17,7 @@
 #include "LED_Display.h"
 
 #define BLINK_INTERVAL      1000
+#define RSSI_AVG_NUM        5
     
 #define DISPLAYDATA_STARTSHOW_OK    0
 #define DISPLAYDATA_STARTSHOW_BUSY  1  

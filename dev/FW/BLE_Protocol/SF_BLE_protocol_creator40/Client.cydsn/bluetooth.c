@@ -13,10 +13,15 @@
 
 BLE_advPacketData_t advData;
 void BLE_AppEventHandler(uint32 event, void* eventParam);
-uint8 newDataFlag = 0;
+uint8 newAdvDataReceivedFlag = 0;
+int8 lastRSSI = 0;
+uint8 serviceModeFlag = 0;
+uint8 packetCheckInitFlag = 0;
+uint8 advDataReceivedFlag = 0;
 
 void BLE_Init(void)
 {
+    packetCheckInitFlag = 0;
     BLE_ADV_DataBuff_Clear();
     CyBle_Start(BLE_AppEventHandler);
 }
@@ -45,35 +50,49 @@ void BLE_ScanProgressEventHandler(CYBLE_GAPC_ADV_REPORT_T* eventParam)
     
     if(BLE_ADV_IsPacketValid(eventParam->data, eventParam->dataLen))
     {
-        if(memcmp(prewPacket, eventParam->data, eventParam->dataLen) != 0) /*check for new packet*/
+        lastRSSI = eventParam->rssi;
+        advDataReceivedFlag = 1;
+        
+        if(memcmp(prewPacket, eventParam->data, eventParam->dataLen) != 0 ||
+            packetCheckInitFlag == 0) /*check for new packet*/
         {
             memcpy(prewPacket, eventParam->data, eventParam->dataLen);
+            packetCheckInitFlag = 1;
             
             BLE_ADV_DataUnpack(&advData, eventParam);
             
-            result = BLE_ADV_DataBuff_SaveData(&advData);
-            if(result != BLE_ADV_RESULT_DATA_NO_CHANGES)
+            if((advData.StatusByte & STATUS_SERVICE_MODE_MASK) != 0)
             {
-                newDataFlag = 1;
+                serviceModeFlag = 1;
+                BLE_ADV_DataBuff_Clear();
+            }
+            else
+            {
+                serviceModeFlag = 0;
                 
-                if(result == BLE_ADV_RESULT_DATA_ADDED)
+                result = BLE_ADV_DataBuff_SaveData(&advData);
+                if(result != BLE_ADV_RESULT_DATA_NO_CHANGES)
                 {
-                    DBG_PRINTF("New data :\r\n");
+                    newAdvDataReceivedFlag = 1;
+                    
+                    if(result == BLE_ADV_RESULT_DATA_ADDED)
+                    {
+                        DBG_PRINTF("New data :\r\n");
+                    }
+                    if(result == BLE_ADV_RESULT_DATA_UPDATED)
+                    {
+                        DBG_PRINTF("Updated data :\r\n");
+                    }
+                    if(result == BLE_ADV_RESULT_DATA_REPLACED)
+                    {
+                        DBG_PRINTF("Replaced data :\r\n");
+                    }
+                    
+                    DEBUG_DISPLAY_Print(&advData);
+                    DBG_PRINTF("\r\n");
                 }
-                if(result == BLE_ADV_RESULT_DATA_UPDATED)
-                {
-                    DBG_PRINTF("Updated data :\r\n");
-                }
-                if(result == BLE_ADV_RESULT_DATA_REPLACED)
-                {
-                    DBG_PRINTF("Replaced data :\r\n");
-                }
-                
-                DEBUG_DISPLAY_Print(&advData);
-                DBG_PRINTF("\r\n");
             }
         }
-        
         Pin_RedLED_Write(~Pin_RedLED_Read());
     }
 }
@@ -102,17 +121,34 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
     DEBUG_BLE_PrintAppEvent(event, eventParam);
 }
 
-
-uint8 BLE_IsNewAdvData()
+uint8 BLE_IsAdvDataReceived(void)
 {
     uint8 retResult = 0;
     
-    retResult = newDataFlag;
-    newDataFlag = 0;
+    retResult = advDataReceivedFlag;
+    advDataReceivedFlag = 0;
     
     return retResult;
 }
 
+uint8 BLE_IsNewAdvDataReceived(void)
+{
+    uint8 retResult = 0;
+    
+    retResult = newAdvDataReceivedFlag;
+    newAdvDataReceivedFlag = 0;
+    
+    return retResult;
+}
 
+int8 BLE_GetLastRSSI(void)
+{
+    return lastRSSI;
+}
+
+uint8 BLE_GetServiceModeFlag(void)
+{
+    return serviceModeFlag;
+}
 
 /* [] END OF FILE */

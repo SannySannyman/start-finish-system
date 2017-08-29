@@ -20,12 +20,14 @@
 #define BLE_ADV_PROCESS_OK              0u
 #define BLE_ADV_PROCESS_PACKET_UPDATED  1u
 #define BLE_ADV_PROCESS_UPD_WAIT        2u
-#define BLE_ADV_PROCESS_ERR             3u
+#define BLE_ADV_PROCESS_DEFAULT         3u
+#define BLE_ADV_PROCESS_ERROR           4u
 
 
 void BLE_ADV_NextPacket(void);
 uint8 BLE_ADV_Process(void);
-void BLE_Start(void);
+void BLE_SetServiceMode(uint8 mode);
+void BLE_Init(void);
 
 
 

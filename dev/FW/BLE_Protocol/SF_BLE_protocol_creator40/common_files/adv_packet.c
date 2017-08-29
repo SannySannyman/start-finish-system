@@ -246,7 +246,7 @@ void BLE_ADV_DataPack(CYBLE_GAPP_DISC_DATA_T *discData,
                         const BLE_advPacketData_t *data)
 {   
     discData->advData[ADV_PACKET_UUID_DATALEN] = ADV_PACKET_LEN - 4; /* Length */
-    discData->advData[ADV_PACKET_SERVICEDATA] = 0x16;      /* Service Data */
+    discData->advData[ADV_PACKET_SERVICEDATA] = BLE_ADV_SERVICE_DATA;      /* Service Data */
     discData->advData[ADV_PACKET_UUID_LSB] = BLE_CUSTOM_SERVICE_UUID_LSB;
     discData->advData[ADV_PACKET_UUID_MSB] = BLE_CUSTOM_SERVICE_UUID_MSB;
     
@@ -329,6 +329,18 @@ uint8 BLE_ADV_IsPacketValid(uint8 *data, uint8 len)
     }
 
     return 0;
+}
+
+
+void BLE_ADV_GetDefaultData(BLE_advPacketData_t *data)
+{
+    data->TryNum = 0;
+    data->SkierNum = 0;
+    data->StatusByte = STATUS_SERVICE_MODE_MASK;
+    data->TimeStart = 0;
+    data->TimeFinish = 0;
+    data->TimeResult = 0;
+    snprintf(data->Text, BLE_ADV_PACKET_TEXTBUFFLEN, " ");
 }
 
 /* [] END OF FILE */
